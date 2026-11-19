@@ -7,7 +7,7 @@ import asyncio
 import glob
 import socket
 import time
-from datetime import timedelta
+from datetime import timedelta,datetime
 
 import psutil
 
@@ -42,14 +42,23 @@ def read_stats() -> str:
     ram = psutil.virtual_memory()
     disk = psutil.disk_usage("/")
     up = timedelta(seconds=int(time.time() - psutil.boot_time()))
+    
+    with open("/etc/os-release") as f:
+        for line in f:
+            if line.startswith("PRETTY_NAME="):
+                os = line.split("=", 1)[1].strip().strip('"').strip("'")
+            break
+        
     return (
-        f"____________STATS__________\n"
-        f"{socket.gethostname()}\n"
+        f"____________STATS__________\n\n"
+        f"<b>TIME</b>  :<i>{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</i>\n"
+        f"<b>OS</b>    : {os}\n"
+        f"<b>hostname</b> :{socket.gethostname()}\n"
         f"<b>Temp</b>   : {temp}\n"
         f"<b>CPU</b>    : {psutil.cpu_percent(interval=1):.0f}%\n"
         f"<b>RAM</b>    : {ram.percent:.0f}% ({ram.available / 2**20:.0f} MB avail)\n"
         f"<b>Disk</b>   : {disk.percent:.0f}%\n"
-        f"<b>Uptime</b> : {up}"
+        f"<b>Uptime</b> : {up}\n"
         f""
         f"have a good day :)"
     )

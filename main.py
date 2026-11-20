@@ -8,7 +8,7 @@ import glob
 import socket
 import time
 from datetime import timedelta,datetime
-
+from logger import log_this
 import psutil
 
 # ENV stuff
@@ -74,6 +74,17 @@ async def idk_how_to_respond(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text("Um..idk how to respond that. sry")
     print("Used idk how to respond")
 
+
+# to log the messages into a json file 
+async def log(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_message:
+        log_this(
+            userID=update.effective_user.id if update.effective_user else None,
+            chatID=update.effective_chat.id if update.effective_chat else None,
+            content=update.effective_message.text,
+        )
+    print(f"Logged !")
+
 def main() -> None:
     app = Application.builder().token(BOT_TOKEN).build()
 
@@ -82,9 +93,10 @@ def main() -> None:
     app.add_handler(CommandHandler("whoami" , whoami))
     app.add_handler(CommandHandler("stats" , stats))
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, idk_how_to_respond))    
+
+    app.add_handler(MessageHandler(filters.ALL, log), group=1)  # handler to log into json file
     
     app.run_polling(allowed_updates=Update.ALL_TYPES)
-    print(f"The bot is polling...")
 
 if __name__ == "__main__":
     main()
